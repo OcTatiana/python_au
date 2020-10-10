@@ -2,6 +2,7 @@
 
 + [Merge Intervals](#merge-intervals)
 + [Insert Interval](#insert-interval)
+
 [comment]: <> (Stop)
 
 ## Merge Intervals

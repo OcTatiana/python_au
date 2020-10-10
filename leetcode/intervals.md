@@ -1,4 +1,4 @@
-#Intervals
+# Intervals
 
 + [Merge Intervals](#merge-intervals)
 + [Insert Interval](#insert-interval)

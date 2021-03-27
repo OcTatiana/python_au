@@ -1,4 +1,6 @@
 TOKEN = ''
+BEGIN = 'VERIFICATION RESULT'
+LOGIN = 'OcTatiana'
 
 import requests
 import json
@@ -42,7 +44,8 @@ def check_comment(message):
 
 
 def create_message(pull_req):
-    message = "Your pull request: {}\n".format(pull_req['title'])
+    message = "{}\n\n".format(BEGIN)
+    message += "Your pull request: {}\n".format(pull_req['title'])
     message += check_comment(pull_req['title'])
     message += '\n\n'
     comment_time = get_time_of_the_last_comment(pull_req)
@@ -50,9 +53,10 @@ def create_message(pull_req):
         commit_time = get_time_of_the_commit(com)
         if compare_dates(comment_time, commit_time):
             comm = com['commit']
-            message += 'Your commit: {}\n'.format(comm['message'])
-            message += check_comment(comm['message'])
-            message += '\n'
+            if len(check_comment(comm['message'])) > 1:
+                message += 'Your commit: {}\n'.format(comm['message'])
+                message += check_comment(comm['message'])
+                message += '\n'
     return message
 
 
@@ -69,7 +73,11 @@ def get_time_of_the_last_comment(pull_req):
     all_comments = requests.get(pull_req['review_comments_url'], headers=prepare_headers()).json()
     last_comment = "0000-00-00T00:00:00Z"
     for comment in all_comments:
-        last_comment = comment['created_at']
+        user_name = comment['user']['login']
+        if check_author(LOGIN, user_name):
+            message = comment['body']
+            if message[:19:] == BEGIN:
+                last_comment = comment['created_at']
     return last_comment
 
 
@@ -85,9 +93,13 @@ def compare_dates(last_comment_date, commit_date):
         return True
 
 
+def check_author(verifying, user_name):
+    return verifying == user_name
+
+
 def main():
     for pr in get_all_user_pull_reqs('OcTatiana', 'python_au', 'open').json():
-        if len(create_message(pr)) > 200:
+        if len(create_message(pr)) > 120:
             send_message(pr, create_message(pr))
 
 
